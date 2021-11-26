@@ -21,13 +21,33 @@ class Config extends Model
         'updated_by'
     ];
 
-    public function get_value()
+    /**
+     * @param $key
+     * @param $value
+     * @return App\Models\Config
+     */
+    public function get_value($key)
     {
-
+        $config = Config::where('key', $key)->first();
+        if(($config) && ($config->encrypted))
+        {
+            $config->value = Crypt::decryptString($config->value);
+        }
+        return $config;
     }
 
-    public function set_value()
+    public function set_value($key, $value, $updated_by, $encrypted = 0 )
     {
+        $config = Config::get_value($key_value);
+
+        if(($config) && ($config->encrypted))
+        {
+            $value = Crypt::encryptString($value);
+        }
+        Config::updateOrInsert(
+            ['key' => $key,  'encrypted' => $encrypted],
+            ['updated_by' => $updated_by, 'value' => $value]
+        );
 
     }
 }
